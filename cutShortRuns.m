@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 function values = cutShortRuns(values, minRunLength)
     % values may contain missing or bad data represented by NaNs.  These
     % delineate islands of good data.  If any such island contains less than

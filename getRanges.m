@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 function [iStart, iEnd] = getRanges(a)
     % a is a vector of boolean values.  This routine returns the indices of
     % the start and end of runs of true values.

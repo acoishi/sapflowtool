@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 classdef LineEditWindow < handle
     % A base class for GUI tools that allow editing of linear data.
     %

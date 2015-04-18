@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 % Process PAR data: simple
 function PAR = processPar(PAR, Time)
     % Process PAR data: simple

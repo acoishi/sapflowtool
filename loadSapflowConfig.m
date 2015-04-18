@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 function c = loadSapflowConfig(filename)
     % Reads the project configuration and sensor data state from an XML
     % file.  Processes the information via a DOM intermediate.

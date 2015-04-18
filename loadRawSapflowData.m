@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 function [yearNum, par, vpd, sapflow, doy, tod] = loadRawSapflowData(filename)
     % Reads sapflow and other data from the specified file
     %TEMP!!! currently what data is in which column is hardcoded

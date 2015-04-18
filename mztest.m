@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 close all;
 fig = figure();
 af1 = axes('Parent', fig, 'Position', [0.1, 0.8, 0.8, 0.1]);

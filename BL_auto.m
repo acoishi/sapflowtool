@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 
 function [spbl lspbl zvbl lzvbl]=BL_auto(xSensor,DOY,xDOY,Timestep,PAR,PARthresh,VPD,VPDthresh,VPDtime);
 

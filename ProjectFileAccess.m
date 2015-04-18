@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 classdef ProjectFileAccess < handle
     % Used to constuct the XML based project file for the sapflow tool.
     % Does this by building up a DOM document intermediate and calling

@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 function config = projectDialog(origConfig)
     % Presents a rudimentary dialog to set project configuration parameters.
     % This uses the fairly limited inputdlg() facility.  This forces us to

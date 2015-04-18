@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 function config = defaultConfig()
     % This function returns the default values for the project configuration.
     % These can be overridden by a call to projectDialog() or by editing the

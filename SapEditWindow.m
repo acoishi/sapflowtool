@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 classdef SapEditWindow < LineEditWindow
     % The sapflow data editing application.
     %
@@ -112,8 +115,15 @@ classdef SapEditWindow < LineEditWindow
     methods (Access = private)
 
         function helpAbout(~, ~, ~)
-            msgbox({'Created by USDA FS SRS Coweeta', 'License text', '2015'}, 'Sapflow Edit Tool');
+            msgbox(
+                {
+                    'Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service',
+                    'Licensed under the Simplified BSD License'
+                },
+                'Sapflow Edit Tool'
+            );
         end
+
 
         function saveProject(o, ~, ~)
             o.startWait('Saving');

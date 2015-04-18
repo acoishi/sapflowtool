@@ -1,3 +1,6 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
+
 classdef ConfigSaver < handle
     % This is a disaster; xlsread and xlswrite are painfully slow.
     % xlswrite() provide no means of
