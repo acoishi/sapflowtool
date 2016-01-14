@@ -115,13 +115,11 @@ classdef SapEditWindow < LineEditWindow
     methods (Access = private)
 
         function helpAbout(~, ~, ~)
-            msgbox(
-                {
-                    'Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service',
-                    'Licensed under the Simplified BSD License'
-                },
-                'Sapflow Edit Tool'
-            );
+            text = {
+                'Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service'
+                'Licensed under the Simplified BSD License'
+            };
+            msgbox(text, 'Sapflow Edit Tool');
         end
 
 
@@ -217,7 +215,10 @@ classdef SapEditWindow < LineEditWindow
 
             o.endWait();
 
-            o.projectConfig.numSensors = o.projectConfig.numSensors;
+            if o.projectConfig.numSensors == 0
+                %% Reading or processing the source file failed.
+                return
+            end
 
             o.projectFilename = fullfile(path, filename);
             o.setWindowTitle('Sapflow Tool: %s', o.projectFilename)
@@ -298,11 +299,15 @@ classdef SapEditWindow < LineEditWindow
 
 
         function readAndProcessSourceData(o, sensorStates)
+            % Attempt to extract data from the CSV files.
+            % If there is a problem then projectConfig.numSensors is set to
+            % zero.
             o.updateWait(0.1, 'Loading Source Data');
             try
                 [~, par, vpd, sf, doy, tod] = loadRawSapflowData(o.projectConfig.sourceFilename);
             catch err
                 errordlg(err.message, 'Load of raw sapflow data failed')
+                o.projectConfig.numSensors = 0;
                 return;
             end
             o.updateWait(0.2, 'Cleaning');
