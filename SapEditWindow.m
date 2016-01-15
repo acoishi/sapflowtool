@@ -286,7 +286,7 @@ classdef SapEditWindow < LineEditWindow
             kLines = zeros(o.allSfp{1}.ssL, o.projectConfig.numSensors);
             for i = 1:o.projectConfig.numSensors
                 thisSfp = o.allSfp{i};
-                kLines(:,i) = thisSfp.k_line;
+                kLines(:,i) = thisSfp.ka_line;
             end
             try
                 csvwrite(fullfile(path, filename), kLines);
