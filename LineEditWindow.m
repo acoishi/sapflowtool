@@ -9,6 +9,8 @@ classdef LineEditWindow < handle
     % Child classes has access to a number of methods to cleanly access
     % functionality.
 
+    % Edit 2016/03/23; R1: changes chart sizes. adds functions to draw button group labels
+    % and general text fields.
     properties (Access = private)
         figPosScaler % a 1 x 4 array used for placement in figure.
 
@@ -31,7 +33,6 @@ classdef LineEditWindow < handle
     end
 
     methods (Access = protected)
-
 
         function o = LineEditWindow()
             % Constructor creates the figure and places charts.
@@ -62,10 +63,10 @@ classdef LineEditWindow < handle
             % Create the 4 charts, butting the full plots together and the
             % zoom plots together
             %TEMP!!! naming sapflow tool specific.
-            o.charts.dtFull = o.makeChart([1, 22.25, 23, 1.75]);
-            o.charts.kFull =  o.makeChart([1, 20, 23, 1.75]);
-            o.charts.dtZoom = o.makeChart([1, 10.25, 17, 8.75]);
-            o.charts.kZoom =  o.makeChart([1, 1, 17, 8.75]);
+            o.charts.dtFull = o.makeChart([1, 21.75, 23, 2.25]);
+            o.charts.kFull =  o.makeChart([1, 19, 23, 2.25]);
+            o.charts.dtZoom = o.makeChart([1, 7.25, 17, 10.75]);
+            o.charts.kZoom =  o.makeChart([1, 1, 17, 5.75]);
             % don't label the top plots' X axis
             o.charts.dtFull.XTickLabel = [];
             o.charts.dtZoom.XTickLabel = [];
@@ -73,7 +74,7 @@ classdef LineEditWindow < handle
             o.statusBar = uicontrol( ...
                 'Parent', o.figureHnd, ...
                 'Style', 'edit', 'String', '',...
-                'Position', o.figPosScaler .* [1 * 1.75 + 17.5, 1, 1.5+2*1.75, 0.8], ...
+                'Position', o.figPosScaler .* [21, 1, 3.25, 0.8], ...
                 'Enable', 'Off' ...
             );
 
@@ -92,7 +93,6 @@ classdef LineEditWindow < handle
             o.figureHnd.KeyPressFcn = @o.handleKeypress;
         end
 
-
         function plotHandle = createEmptyLine(o, chartName, style)
             % Generate a plot for later population
             %
@@ -100,7 +100,6 @@ classdef LineEditWindow < handle
             % style.
             plotHandle = plot(o.charts.(chartName), 0, 0, style, 'Visible', 'Off', 'PickableParts', 'none');
         end
-
 
         function addCommand(o, name, menu, text, key, toolTip, col, row, callback)
             % Creates a button and corresponding keyboard shortcut
@@ -148,6 +147,48 @@ classdef LineEditWindow < handle
         end
 
 
+        function addCommandDesc(o, name, menu, text, col, row )
+            % Creates a descriptor for Command buttons
+            %
+            % name: used to refer to text comment from within code
+            % text: to display on "button"
+            % col, row: position of button in region
+            % callback: is invoked on button click or keypress.
+            %
+            % By default the command is disabled - see enableCommands()
+            %
+
+            if row && col
+                o.buttons.(name) = uicontrol( ...
+                    'Parent', o.figureHnd, ...
+                    'Style', 'text', 'String', text,...
+                    'Position', o.figPosScaler .* [col * 1 + 20, row + 1, 3, 0.8]);
+            end
+
+        end
+
+        function addChartDesc(o, name, menu, text, col, row )
+            % Creates a text description of charts
+            %
+            % name: used to refer to text comment from within code
+            % text: to display next to chart
+            % col, row: position of button in region
+            % callback: is invoked on button click or keypress.
+            %
+            % By default the command is disabled - see enableCommands()
+            %
+
+            if row && col
+                o.buttons.(name) = uicontrol( ...
+                    'Parent', o.figureHnd, ...
+                    'Style', 'text', 'String', text,...
+                    'Position', o.figPosScaler .* [col * 1 + 17.25, row + 1, 2, 5],...
+                    'HorizontalAlignment','left');
+            end
+
+        end
+
+
         function disableCommands(o, names)
             % Greys out specified buttons
             %
@@ -161,12 +202,10 @@ classdef LineEditWindow < handle
             o.setCommandState(names, 'Off');
         end
 
-
         function enableCommands(o, names)
             % The counterpart to disableCommands
             o.setCommandState(names, 'On')
         end
-
 
         function renameCommand(o, name, string)
             % Used to change the text for a command's button and menu.
@@ -180,13 +219,11 @@ classdef LineEditWindow < handle
             end
         end
 
-
         function reportStatus(o, format, varargin)
             % Updates the status bar
             o.statusBar.String = sprintf(format, varargin{:});
             drawnow();
         end
-
 
         function disableChartsControl(o)
             % Stop the user from zooming etc.
@@ -195,7 +232,6 @@ classdef LineEditWindow < handle
             end
         end
 
-
         function enableChartsControl(o)
             % Allow user control of the charts, now that there's valid data.
             for name = fieldnames(o.charts)'
@@ -203,13 +239,11 @@ classdef LineEditWindow < handle
             end
         end
 
-
         function setWindowTitle(o, format, varargin)
             % Sets the text at the top of the window.  Accepts printf()
             % arguments.
             o.figureHnd.Name = sprintf(format, varargin{:});
         end
-
 
         function startWait(o, message)
             % Create a modal window while we execute a lengthy command.
@@ -220,7 +254,6 @@ classdef LineEditWindow < handle
             o.waitBarWindow = waitbar(0, message, 'Name', message, 'WindowStyle', 'modal');
         end
 
-
         function updateWait(o, progress, format, varargin)
             % Our lengthy process is progressing.  Update the waitbar dialog
             % with progress (a value 0.0 to 1.0) and some text (with printf()
@@ -229,20 +262,15 @@ classdef LineEditWindow < handle
             waitbar(progress, o.waitBarWindow, message);
         end
 
-
         function endWait(o)
             % Whatever lengthy task we started has finished so remove the
             % modal (blocking) waitbar window.
             o.figureHnd.Pointer = 'arrow';
             delete(o.waitBarWindow);
-
         end
-
-
     end
 
     methods (Access = private)
-
 
         function setCommandState(o, names, state)
             % Used to enable or disable commands.  If cell array of names,
@@ -262,7 +290,6 @@ classdef LineEditWindow < handle
                 end
             end
         end
-
 
         function handleKeypress(o, ~, event)
             % Callback for any keypress event.
@@ -287,7 +314,6 @@ classdef LineEditWindow < handle
             end
         end
 
-
         function a = makeChart(o, pos)
             % Helper function used by constructor.
 
@@ -303,9 +329,5 @@ classdef LineEditWindow < handle
             );
             hold(a, 'on');  % so we can add numerous lines
         end
-
-
     end
 end
-
-

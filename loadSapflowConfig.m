@@ -31,6 +31,7 @@ function config = readProjectConfig(parent)
     config.projectName = getNodeStringValue(node, 'ProjectName');
     config.projectDesc = getNodeStringValue(node, 'ProjectDesc');
     config.sourceFilename = getNodeStringValue(node, 'SourceFilename');
+    config.Timestep = getNodeIntegerValues(node, 'Timestep', 1);
     config.numSensors = getNodeIntegerValues(node, 'NumberSensors', 1);
     config.minRawValue = getNodeFloatValues(node, 'MinRawValue', 1);
     config.maxRawValue = getNodeFloatValues(node, 'MaxRawValue',1 );

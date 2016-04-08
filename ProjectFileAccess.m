@@ -42,6 +42,7 @@ classdef ProjectFileAccess < handle
             o.addTextElement(element, 'ProjectName', s.projectName);
             o.addTextElement(element, 'ProjectDesc', s.projectDesc);
             o.addTextElement(element, 'SourceFilename', s.sourceFilename);
+            o.addIntegerElement(element, 'Timestep', s.Timestep);
             o.addIntegerElement(element, 'NumberSensors', s.numSensors);
             o.addFloatElement(element, 'MinRawValue', s.minRawValue);
             o.addFloatElement(element, 'MaxRawValue', s.maxRawValue);
