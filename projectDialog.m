@@ -2,12 +2,13 @@
 %% Licensed under the Simplified BSD License
 
 function config = projectDialog(origConfig)
-    % Presents a rudimentary dialog to set project configuration parameters.
-    % This uses the fairly limited inputdlg() facility.  This forces us to
-    % select filenames beforehand with a separate call to getfile().
+    % Presents a rudimentary dialog to set project configuration
+    % parameters. This uses the fairly limited inputdlg() facility - a
+    % constraint that forces us to select filenames beforehand with a
+    % separate call to getfile().
     %
-    % The user's input is checked when they press "okay" and if there's an issue
-    % the an error dialog is displayed any they may then correct the problem.
+    % The user's input is checked when they press "okay". If there's an issue
+    % then an error dialog is displayed and the user may then correct the problem.
     %
     % If successful the updated config is returned; if the user cancels then 0
     % is returned.
