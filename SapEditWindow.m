@@ -192,10 +192,8 @@ classdef SapEditWindow < LineEditWindow
             if not(sourceFilename)
                 return
             end
-            if not(strcmp(path, sourcePath))
-                %TEMP!!! abs paths are going to be an issue
-                sourceFilename = fullfile(sourcePath, sourceFilename);
-            end
+
+            sourceFilename = fullfile(sourcePath, sourceFilename);
 
             config = defaultConfig();
             config.sourceFilename = sourceFilename;
@@ -378,7 +376,6 @@ classdef SapEditWindow < LineEditWindow
             o.enableCommands({'panLeft', 'panRight', 'zoomIn', 'zoomOut', 'nextSensor', 'prevSensor', 'auto'});
 
             o.zoomer.setYLimits({[0, max(o.sfp.ss)], [0, 1]});
-        end
 
         function sapflowUpdated(o)
             % The SapflowProcessor calls this when sapflow is changed.
