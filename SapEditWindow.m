@@ -6,6 +6,8 @@ classdef SapEditWindow < LineEditWindow
     %
     % Allows operators to view and edit sapflow data and to specify a baseline
     % representing zero sapflow.
+    % Revisions 3/23/2016 [ACO]:
+    %   adds more labels; cosmetic only
 
     properties
         lines % Structure containing handles to each of the lines representing the data
@@ -27,12 +29,10 @@ classdef SapEditWindow < LineEditWindow
 
     methods (Access = public)
 
-
          function o = SapEditWindow()
             % Constructor sets up window
             %
             % It added sapflow specific items to the generic LineEditWindow object.
-
 
             o@LineEditWindow(); % Create generic window.
 
@@ -45,6 +45,7 @@ classdef SapEditWindow < LineEditWindow
             uimenu(mf, 'Label', 'Save Project', 'Accelerator', 'S', 'Callback', @o.saveProject);
             uimenu(mf, 'Label', 'Save As', 'Callback', @o.saveAs);
             uimenu(mf, 'Label', 'Export k Data', 'Callback', @o.export);
+            uimenu(mf, 'Label', 'Export k Error', 'Callback', @o.export_kerror);
             uimenu(mf, 'Label', 'Exit', 'Accelerator', 'X', 'Callback', @o.checkExit);
 
             uimenu(mh, 'Label', 'About', 'Callback', @o.helpAbout);
@@ -53,23 +54,53 @@ classdef SapEditWindow < LineEditWindow
             o.figureHnd.CloseRequestFcn = @o.checkExit;
 
             % Add in controls
-            o.addCommand('nextSensor',  0, 'next sensor',         'downarrow',  'next sensor',       2, 13, @(~,~)o.selectSensor(1));
-            o.addCommand('prevSensor', 0, 'prev sensor',         'uparrow', 'prev sensor',      2, 15, @(~,~)o.selectSensor(-1));
-            o.addCommand('panLeft',  0, '< pan',         'leftarrow',  'pan focus area left',       1, 14, @(~,~)o.zoomer.pan(-0.8));
-            o.addCommand('panRight', 0, 'pan >',         'rightarrow', 'pan focus area right',      3, 14, @(~,~)o.zoomer.pan(+0.8));
-            o.addCommand('zoomIn',   0, 'zoom in',       'add',        'narrow focus area duration', 1, 11, @(~,~)o.zoomer.zoom(0.8));
-            o.addCommand('zoomOut',  0, 'zoom out',      'subtract',   'expand focus area duration', 3, 11, @(~,~)o.zoomer.zoom(1.25));
-            o.addCommand('zoomReg',  0, 'zoom sel',      'z',          'zoom to selection',                2, 11, @o.zoomtoRegion);
+            o.addCommandDesc('pantext', 0, 'Active Screen',      1, 16);
+            o.addCommand('panLeft',  0, '< pan',         'leftarrow',  'pan focus area left',       2, 15, @(~,~)o.zoomer.pan(-0.8));
+            o.addCommand('panRight', 0, 'pan >',         'rightarrow', 'pan focus area right',      3, 15, @(~,~)o.zoomer.pan(+0.8));
+            o.addCommand('zoomIn',   0, 'zoom in',       'add',        'narrow focus area duration', 2, 14, @(~,~)o.zoomer.zoom(0.8));
+            o.addCommand('zoomOut',  0, 'zoom out',      'subtract',   'expand focus area duration', 3, 14, @(~,~)o.zoomer.zoom(1.25));
+            o.addCommand('zoomReg',  0, 'zoom sel',      'z',          'zoom to selection',                2, 13, @o.zoomtoRegion);
 
-            o.addCommand('delBla',   me, 'del BL anchors','delete',          'delete baseline anchors in range', 1, 8, @o.delBla);
-            o.addCommand('deleteSapflow', me,  'delete SF data','d',          'delete selected sapflow data',         1, 7, @o.deleteSapflow);
-            o.addCommand('interpolateSapflow', me,  'interpolate SF','i',          'interpolate selected sapflow data',    2, 7, @o.interpolateSapflow);
-            o.addCommand('anchorBla', me, 'anchor BL',     'a',          'anchor baseline to suggested points',  3, 7, @o.anchorBla);
-            o.addCommand('auto', me,     'auto BL',     'shift-a',          'apply automatic baseline anchors',       3, 8, @o.autoSetBaseline);
+            o.addCommandDesc('pantext', 0, 'Edit dT',      1, 12);
+            o.addCommand('deleteSapflow', me,  'delete SF data','d',          'delete selected sapflow data',         2, 11, @o.deleteSapflow);
+            o.addCommand('interpolateSapflow', me,  'interpolate SF','i',          'interpolate selected sapflow data',    3, 11, @o.interpolateSapflow);
+            o.addCommand('addBreakpoint', me,  'add dT breakpoint','shift-b',          'add dT breakpoint',         3, 10, @o.addBreak);
 
-            o.addCommand('undo', me,    'undo last',     'control-z',          'undo last command',                    2, 5, @(~,~)o.sfp.undo());
+            o.addCommandDesc('pantext', 0, 'Edit dTmax Baseline',      1, 9);
+            o.addCommand('delBla',   me, 'del BL anchors','delete',          'delete baseline anchors in range', 2, 8, @o.delBla);
+            o.addCommand('anchorBla', me, 'anchor BL',     'a',          'anchor baseline to suggested points',  3, 8, @o.anchorBla);
 
-            %TEMP!!! o.addCommand('addBla',   0, 'add BL anchor','b',          'add baseline anchors at cursor (b)', 0, 0, @o.addBla);
+            o.addCommandDesc('pantext', 0, 'Automatic dTmax Baseline',      1, 7);
+            o.addCommand('autoNightly', me,     'Nightly BL',     'shift-n',          'apply nightly baseline anchors',       2, 6, @o.autoNightlyBaseline);
+            o.addCommand('auto', me,     'auto BL',     'shift-a',          'apply automatic baseline anchors',       3, 6, @o.autoSetBaseline);
+
+            o.addCommand('undo', me,    'undo last',     'control-z',          'undo last command',                    1, 6, @(~,~)o.sfp.undo());
+
+            o.addCommandDesc('pantext', 0, 'Flag questionable k data',      1, 4);
+
+            o.addCommand('prevSensor', 0, 'prev sensor',         'uparrow', 'prev sensor',      2, 1, @(~,~)o.selectSensor(-1));
+            o.addCommand('nextSensor',  0, 'next sensor',         'downarrow',  'next sensor',       3, 1, @(~,~)o.selectSensor(1));
+
+
+            o.addChartDesc('dTcharttxt', 0,...
+                ['Blue line: dT data            ';
+                 '                              ';
+                 'Red line: dTmax baseline      ';
+                 'Red o: dTmax anchor points    ';
+                 '                              ';
+                 'Green dot: Stable nighttime dT';
+                 'Black dot: Stable dT & low VPD'],...
+                    1, 11);
+            o.addChartDesc('kcharttxt', 0,...
+                ['Blue line: Initial k        ';
+                 '     max nightly dT         ';
+                 '                            ';
+                 'Red line: Current k         ';
+                 '     based on red line above';
+                 '                            ';
+                 'Green line: VPD (normalized)'],...
+                    1, .5);
+                       %TEMP!!! o.addCommand('addBla',   0, 'add BL anchor','b',          'add baseline anchors at cursor (b)', 0, 0, @o.addBla);
 
             % Specify all the plot lines we'll use.
             o.lines = struct();
@@ -84,8 +115,8 @@ classdef SapEditWindow < LineEditWindow
 
             o.lines.kLineAll   = o.createEmptyLine('kFull',  'b-');
             o.lines.kLine      = o.createEmptyLine('kZoom',  'b-');
-            o.lines.kaLineAll  = o.createEmptyLine('kFull',  'r:');
-            o.lines.kaLine     = o.createEmptyLine('kZoom',  'r:');
+            o.lines.kaLineAll  = o.createEmptyLine('kFull',  'r--');
+            o.lines.kaLine     = o.createEmptyLine('kZoom',  'r--');
             o.lines.nvpd       = o.createEmptyLine('kZoom',  'g-');
 
             o.selectBox        = o.createEmptyLine('dtZoom',  'k:');
@@ -108,18 +139,30 @@ classdef SapEditWindow < LineEditWindow
             o.projectConfig.numSensors = 0;
          end
 
-
-
     end
 
     methods (Access = private)
 
         function helpAbout(~, ~, ~)
+
             text = {
+                'Baseliner 4.beta'
+                ''
+                'Created by the USDA Forest Service'
+                'Southern Research Station, Coweeta Hydrologic Laboratory'
+                ' '
+                'We acknowledge Ram Oren and the C-H2O Ecology Lab group at the Nicholas'
+                'School of the Environment at Duke University for development of Baseliner'
+                'versions 1 through 3 where software development was supported by the'
+                'Biological and Environmental Research (BER) Program, U.S. Department'
+                'of Energy, through the Southeast Regional Center (SERC) of the National'
+                'Institute for Global Envrironmental Change (NIGEC), and through the '
+                'Terrestrial Carbon Process Program (TCP).'
+                ' '
                 'Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service'
                 'Licensed under the Simplified BSD License'
             };
-            msgbox(text, 'Sapflow Edit Tool');
+            msgbox(text, 'About Baseliner 4');
         end
 
 
@@ -140,13 +183,11 @@ classdef SapEditWindow < LineEditWindow
             o.endWait();
         end
 
-
         function checkExit(o, ~, ~)
             if o.checkForUnsaved('exiting')
                 delete(o.figureHnd);  % which stops the application
             end
         end
-
 
         function doAction = checkForUnsaved(o, action)
 
@@ -167,7 +208,6 @@ classdef SapEditWindow < LineEditWindow
                 doAction = 1;
             end
         end
-
 
         function saveAs(o, ~, ~)
             [filename, path] = uiputfile('*.xml', 'Select Project File');
@@ -222,7 +262,6 @@ classdef SapEditWindow < LineEditWindow
             o.setWindowTitle('Sapflow Tool: %s', o.projectFilename)
 
             o.saveProject(0, 0)
-
         end
 
         function closeDownCurrent(o)
@@ -264,15 +303,12 @@ classdef SapEditWindow < LineEditWindow
                 end
             end
 
-
             o.projectConfig = allConfig.project;
 
             o.readAndProcessSourceData(allConfig.sensors)
 
             o.endWait()
-
         end
-
 
         function export(o, ~, ~)
             % The user wants to export data from the tool.
@@ -286,8 +322,9 @@ classdef SapEditWindow < LineEditWindow
                 thisSfp = o.allSfp{i};
                 kLines(:,i) = thisSfp.ka_line;
             end
+            kOut=[ones(thisSfp.ssL,1) thisSfp.doy thisSfp.tod thisSfp.vpd thisSfp.par kLines];
             try
-                csvwrite(fullfile(path, filename), kLines);
+                csvwrite(fullfile(path, filename), kOut);
             catch err
                 errordlg(err.message, 'Export failed')
             end
@@ -295,6 +332,37 @@ classdef SapEditWindow < LineEditWindow
             o.endWait();
         end
 
+        function export_kerror(o, ~, ~)
+            % The user wants to export estimate of error associated with alternate point selection of dTmax values.
+            [filename, path] = uiputfile('*.csv', 'Select Export File');
+            if not(filename)
+                return
+            end
+            o.startWait('Exporting');
+
+            kError = zeros(o.allSfp{1}.ssL, o.projectConfig.numSensors);
+
+            for i = 1:o.projectConfig.numSensors
+                thisSfp = o.allSfp{i};
+                thisSensor = o.allSfp{i}.ss';
+                thisbla = o.allSfp{i}.bla';
+                if length(thisbla)>2
+                    [mean_k, sd_k]=BL_rand(thisSensor,o.projectConfig.Timestep,thisbla);
+                else
+                   sd_k = zeros(o.allSfp{1}.ssL,1);
+                end
+
+                kError(:,i) = sd_k;
+            end
+            kOut=[ones(thisSfp.ssL,1) thisSfp.doy thisSfp.tod thisSfp.vpd thisSfp.par kError];
+            try
+                csvwrite(fullfile(path, filename), kOut);
+            catch err
+                errordlg(err.message, 'Export failed')
+            end
+
+            o.endWait();
+        end
 
         function readAndProcessSourceData(o, sensorStates)
             % Attempt to extract data from the CSV files.
@@ -340,7 +408,6 @@ classdef SapEditWindow < LineEditWindow
             o.sfpI = 1;
             o.sfp = o.allSfp{o.sfpI};
 
-
             o.zoomer.setXLimit([1, o.sfp.ssL]);
 
             o.setXData(1:o.sfp.ssL);
@@ -352,12 +419,9 @@ classdef SapEditWindow < LineEditWindow
             for name = {'bla', 'blaAll', 'sapflowAll', 'sapflow', 'spbl', 'zvbl', 'lzvbl', 'kLineAll', 'kLine', 'kaLineAll', 'kaLine', 'nvpd'}
                 o.lines.(name{1}).Visible = 'On';
             end
-
         end
 
-
         function selectSensor(o, dir)
-
             % the joys of MATLAB's index from 1 approach ...
             indexFromZero = o.sfpI - 1;
             indexFromZero = mod(indexFromZero + dir, o.projectConfig.numSensors);
@@ -373,7 +437,7 @@ classdef SapEditWindow < LineEditWindow
 
             o.sfp.setup();
 
-            o.enableCommands({'panLeft', 'panRight', 'zoomIn', 'zoomOut', 'nextSensor', 'prevSensor', 'auto'});
+            o.enableCommands({'panLeft', 'panRight', 'zoomIn', 'zoomOut', 'nextSensor', 'prevSensor', 'auto','autoNightly'});
 
             o.zoomer.setYLimits({[0, max(o.sfp.ss)], [0, max(o.sfp.k_line)]});
         end
@@ -395,7 +459,6 @@ classdef SapEditWindow < LineEditWindow
             o.lines.lzvbl.YData = o.sfp.ss(o.sfp.lzvbl);
         end
 
-
         function baselineUpdated(o)
             % Callback from SapflowProcessor
             o.lines.blaAll.XData = o.sfp.bla;
@@ -410,7 +473,6 @@ classdef SapEditWindow < LineEditWindow
             o.lines.nvpd.YData = o.sfp.nvpd;
         end
 
-
         function delBla(o, ~, ~)
             % The user has clicked the delete baseline button.  Delete the
             % bla values in the selection range.
@@ -418,7 +480,6 @@ classdef SapEditWindow < LineEditWindow
             i = o.pointsInSelection(o.lines.bla);
             o.sfp.delBaselineAnchors(i);
         end
-
 
         function i = pointsInSelection(o, line)
             % For the specified 1xN line, return a 1xN vector indicating
@@ -434,7 +495,6 @@ classdef SapEditWindow < LineEditWindow
             i = i | (isnan(y) & x >= xr(1) & x <= xr(2));  %capture NaN values  %TEMP!!! rethink
         end
 
-
         function deleteSapflow(o, ~, ~)
             % Delete all sapflow sample values inclosed in the selection
             % box.
@@ -444,7 +504,6 @@ classdef SapEditWindow < LineEditWindow
             regions = [find(changes == 1)', find(changes == -1)'];
             o.sfp.delSapflow(regions);
         end
-
 
         function interpolateSapflow(o, ~, ~)
             % Interpolate all sapflow sample values inclosed in the selection
@@ -456,13 +515,11 @@ classdef SapEditWindow < LineEditWindow
             o.sfp.interpolateSapflow(regions);
         end
 
-
         function zoomtoRegion(o, ~, ~)
             % Zoom in so the currently selected area fills the chart.
             o.deselect()
             o.zoomer.zoomToRange(1, o.selection.xRange, o.selection.yRange);
         end
-
 
         function anchorBla(o, ~, ~)
             % Anchor the baseline at every ZeroVpd candidate anchor point
@@ -473,6 +530,13 @@ classdef SapEditWindow < LineEditWindow
 
         end
 
+        function addBreak(o, ~, ~)
+            % .
+%             o.deselect()
+%             i = o.pointsInSelection(o.lines.zvbl);
+%             o.sfp.addBaselineAnchors(o.lines.zvbl.XData(i));
+
+        end
 
         function selectDtArea(o, chart, ~)
             % The user has clicked inside the zoom chart.  Once a range has
@@ -513,7 +577,6 @@ classdef SapEditWindow < LineEditWindow
             end
         end
 
-
         function markerClick(o, line, ~)
             % The user has clicked on the sapflow data line, or a baseline
             % candidate point.  Anchor the baseline to this point.
@@ -533,9 +596,7 @@ classdef SapEditWindow < LineEditWindow
             [~, i] = min(sqDist);
 
             o.sfp.addBaselineAnchors(xd(ii(i)));
-
         end
-
 
         function setXData(o, xData)
             % sets the common X axis values for all the 1 x ssL lines.
@@ -575,14 +636,17 @@ classdef SapEditWindow < LineEditWindow
             end
         end
 
-
         function autoSetBaseline(o, ~, ~)
             o.startWait('Setting Baseline');
             o.sfp.auto();
             o.endWait();
         end
 
-
+        function autoNightlyBaseline(o, ~, ~)
+            o.startWait('Setting Baseline');
+            o.sfp.autoNightly();
+            o.endWait();
+        end
 
         function isChange = anyChangesMade(o)
             % Checks if any sensor has had changes made to it.

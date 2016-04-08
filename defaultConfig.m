@@ -8,6 +8,7 @@ function config = defaultConfig()
     config.sourceFilename = '';
     config.projectName = '';
     config.projectDesc = '';
+    config.Timestep = 15;
     config.minRawValue = 0.5;
     config.maxRawValue = 30;
     config.maxRawStep = 1.5;

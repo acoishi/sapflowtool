@@ -28,6 +28,7 @@ classdef SapflowProcessor < handle
         spbl % zvbl values where standard deviation is less than threshold limit
         lzvbl % final zvbl value each night
 
+        bli % Baseline initial, picks nightly max; a 1 x N
         bla % Baseline adjusted (manually); a 1 x N
 
         % these are 1xN vectors of the same length as the ss vectors
@@ -46,7 +47,7 @@ classdef SapflowProcessor < handle
     properties (SetAccess = public, GetAccess = public)
 
         % These allow configuration of the tool...
-        Timestep = 15;
+%        Timestep = 15;
 
         % External function to be called when the baseline data is changed;
         % this will usually be to update a graph to reflect the change.
@@ -76,7 +77,10 @@ classdef SapflowProcessor < handle
             o.spbl = [1,o.ssL];
             o.zvbl = [1,o.ssL];
             o.lzvbl = [1,o.ssL];
-            o.bla = [1,o.ssL];
+            o.bli = BL_nightly(o);
+
+%            o.bla = [1,o.ssL];
+            o.bla = o.bli; % uses initial baseline as starting point for adjustments
 
             o.cmdStack = Stack(); % Used for undoing commands.
 
@@ -253,7 +257,7 @@ classdef SapflowProcessor < handle
             nDOY(o.tod < 1000) = nDOY(o.tod < 1000) - 1;
 
             [mySpbl, ~, myZvbl, myLzvbl] = BL_auto( ...
-                o.ss', o.doy, nDOY, o.Timestep, o.par, o.config.parThresh, ...
+                o.ss', o.doy, nDOY, o.config.Timestep, o.par, o.config.parThresh, ...
                 o.vpd, o.config.vpdThresh, o.config.vpdTime ...
             );
 
@@ -278,18 +282,89 @@ classdef SapflowProcessor < handle
             o.baselineCallback();
         end
 
+        function autoNightly(o)
+            % Apply an algorithm to the sapflow data to identify some
+            % candidate baseline anchor points.
+
+            % pop-up window to confirm that all baseline points will be changed
+            %  Create and then hide the GUI as it is being constructed.
+            f = figure('Visible','off','Position',[1,1,350,150],...
+               'NumberTitle', 'off', 'MenuBar', 'none');
+
+            htext = uicontrol('Style','text','String','All current dTmax points will be changed. Continue?',...
+                  'Position',[25,80,250,50]);
+
+            yesnight = uicontrol('Style','pushbutton','String',...
+                  'Yes',...
+                  'Position',[50,30,100,30],...
+                  'Callback',@yesnight_Callback);
+            nonight = uicontrol('Style','pushbutton','String',...
+                  'No',...
+                  'Position',[200,30,100,30],...
+                  'Callback',@nonight_Callback);
+
+            f.Name = 'Warning';
+            % Move the GUI to the center of the screen.
+            movegui(f,'center')
+            % Make the GUI visible.
+            f.Visible = 'on';
+
+           %  Callbacks for simple_gui. These callbacks automatically
+           %  have access to component handles and initialized data
+           %  because they are nested at a lower level.
+
+           %  Pop-up menu callback. Read the pop-up menu Value property
+           %  to determine which item is currently displayed and make it
+           %  the current data.
+          function yesnight_Callback(source,eventdata)
+
+            o.bla = BL_nightly(o);
+
+            o.compute();
+            o.sapflowCallback();
+            o.baselineCallback();
+
+            pause(.5)
+            close
+            return;
+          end
+          function nonight_Callback(source,eventdata)
+
+            pause(.5)
+            close
+            return;
+          end
+
+
+        end
+
+        function [bl_night]=BL_nightly(o)
+            % establishes initial baseline based on maximum dT value each
+            % night (defined by time before 7:00 AM)
+            bl_night=[];
+            for d=min(o.doy):max(o.doy)
+                DI=find(o.doy==d & o.tod<700 & o.ss'>0);
+                if length(DI)>0
+                    [mDI,iDI]=max(o.ss(DI));
+                    if length(iDI)>=1
+                        bl_night=[bl_night;DI(iDI(1))];
+                    end
+                end
+            end
+            bl_night=[1;bl_night;length(o.ssL)];
+            bl_night=unique(bl_night)';
+        end
 
         function compute(o)
             % Based on the sapflow, bla and VPD data, calculate the K, KA
             % and NVPD values.
             %
-
-            % If at least two zvbl points are positive ...
-            if sum(o.ss(o.zvbl)>0)>=2
-                blv = interp1(o.zvbl, o.ss(o.zvbl), (1:o.ssL));
+            if sum(o.ss(o.bli)>0)>=2
+                blv = interp1(o.bli, o.ss(o.bli), (1:o.ssL));
                 o.k_line = blv ./ o.ss - 1;
                 o.k_line(o.k_line < 0) = 0;
             else
+                blv=nan*o.zvbl;
                 o.k_line = nan*o.ss;
             end
 
