@@ -1,3 +1,5 @@
+%% Copyright (c) 2015 Coweeta Hydrologic Laboratory US Forest Service
+%% Licensed under the Simplified BSD License
 
 function [mean_k, sd_k]=BL_rand(xSensor,Timestep,bla);
 
