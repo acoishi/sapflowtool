@@ -375,7 +375,8 @@ classdef SapEditWindow < LineEditWindow
 
             o.enableCommands({'panLeft', 'panRight', 'zoomIn', 'zoomOut', 'nextSensor', 'prevSensor', 'auto'});
 
-            o.zoomer.setYLimits({[0, max(o.sfp.ss)], [0, 1]});
+            o.zoomer.setYLimits({[0, max(o.sfp.ss)], [0, max(o.sfp.k_line)]});
+        end
 
         function sapflowUpdated(o)
             % The SapflowProcessor calls this when sapflow is changed.
