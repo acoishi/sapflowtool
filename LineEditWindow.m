@@ -53,15 +53,9 @@ classdef LineEditWindow < handle
                 'OuterPosition', [0, 0.05, 1, 0.95], ...
                 'ToolBar', 'none', ...
                 'NumberTitle', 'off', ...
+                'SizeChangedFcn', @o.sizeChanged, ...
+                'Visible', 'off', ...
                 'MenuBar', 'none');
-
-            % To aid in placement of charts and controls, set up a 25 x 25
-            % gridline for the figure.
-            o.figureHnd.Units = 'pixels';
-            pos = o.figureHnd.Position;
-            xs = pos(3)/25; % width
-            ys = pos(4)/25; % height
-            o.figPosScaler = [xs, ys, xs, ys];
 
             % Create the 4 charts, butting the full plots together and the
             % zoom plots together
@@ -77,7 +71,7 @@ classdef LineEditWindow < handle
             o.statusBar = uicontrol( ...
                 'Parent', o.figureHnd, ...
                 'Style', 'edit', 'String', '',...
-                'Position', o.figPosScaler .* [21, 1, 3.25, 0.8], ...
+                'UserData', [21, 1, 3.25, 0.8], ...
                 'Enable', 'Off' ...
             );
 
@@ -125,7 +119,7 @@ classdef LineEditWindow < handle
                     'Parent', o.figureHnd, ...
                     'Style', 'pushbutton', 'String', text,...
                     'Callback', callback, ...
-                    'Position', o.figPosScaler .* [col * 1.75 + 17.5, row + 1, 1.5, 0.8], ...
+                    'UserData', [col * 1.75 + 17.5, row + 1, 1.5, 0.8], ...
                     'TooltipString', sprintf('%s ("%s")',toolTip, key), ...
                     'KeyPressFcn', @o.handleKeypress, ...
                     'Enable', 'Off' ...
@@ -150,7 +144,7 @@ classdef LineEditWindow < handle
         end
 
 
-        function addCommandDesc(o, name, menu, text, col, row )
+        function addCommandDesc(o, name, ~, text, col, row )
             % Creates a descriptor for Command buttons
             %
             % name: used to refer to text comment from within code
@@ -165,12 +159,12 @@ classdef LineEditWindow < handle
                 o.buttons.(name) = uicontrol( ...
                     'Parent', o.figureHnd, ...
                     'Style', 'text', 'String', text,...
-                    'Position', o.figPosScaler .* [col * 1 + 20, row + 1, 3, 0.8]);
+                    'UserData', [col * 1 + 20, row + 1, 3, 0.8]);
             end
 
         end
 
-        function addChartDesc(o, name, menu, text, col, row )
+        function addChartDesc(o, name, ~, text, col, row )
             % Creates a text description of charts
             %
             % name: used to refer to text comment from within code
@@ -185,7 +179,7 @@ classdef LineEditWindow < handle
                 o.buttons.(name) = uicontrol( ...
                     'Parent', o.figureHnd, ...
                     'Style', 'text', 'String', text,...
-                    'Position', o.figPosScaler .* [col * 1 + 17.25, row + 1, 2, 5],...
+                    'UserData', [col * 1 + 17.25, row + 1, 2, 5],...
                     'HorizontalAlignment','left');
             end
 
@@ -271,10 +265,49 @@ classdef LineEditWindow < handle
             o.figureHnd.Pointer = 'arrow';
             delete(o.waitBarWindow);
         end
+        
+        function show(o)
+            o.figureHnd.Visible = 'On';
+        end
     end
 
     methods (Access = private)
 
+        function resizeItem(o, item)
+            % Called by the figure's resize callback, changes the item's
+            % position in the window.  The desired position is encoded in 
+            % the widget's UserData field in units of 1/25 figure height 
+            % and 1/25 figure width 
+            item.Position = item.UserData .* o.figPosScaler;
+        end
+        
+        
+        function resizeItems(o, itemArray)
+            % Many figure widgets are grouped together in cell arrays.
+            % This method iterates through such an array resizing each
+            % element.
+            names = fieldnames(itemArray);
+            for i = 1:numel(names)
+                o.resizeItem(itemArray.(names{i}))
+            end
+        end
+        
+        
+        function sizeChanged(o, ~, ~)
+            % Callback for when application window is resized or first
+            % displayed.  Goes through each element and redraws it.
+            o.figureHnd.Units = 'pixels';
+            pos = o.figureHnd.Position;
+            xs = pos(3)/25; % width
+            ys = pos(4)/25; % height
+            o.figPosScaler = [xs, ys, xs, ys];
+            
+            o.resizeItems(o.charts)
+            o.resizeItems(o.buttons)
+            o.resizeItem(o.statusBar)
+
+        end    
+            
         function setCommandState(o, names, state)
             % Used to enable or disable commands.  If cell array of names,
             % 'names' is empty then all commands are enabled/disabled.
@@ -325,7 +358,7 @@ classdef LineEditWindow < handle
             a = axes( ...
                 'Units', 'pixels', ...
                 'Parent', o.figureHnd, ...
-                'Position', pos .* o.figPosScaler, ...
+                'UserData', pos, ...
                 'PickableParts', 'none', ...
                 'XGrid', 'on', 'YGrid', 'on', ...
                 'Box', 'on' ...

@@ -54,29 +54,29 @@ classdef SapEditWindow < LineEditWindow
             o.figureHnd.CloseRequestFcn = @o.checkExit;
 
             % Add in controls
-            o.addCommandDesc('pantext', 0, 'Active Screen',      1, 16);
+            o.addCommandDesc('pantext0', 0, 'Active Screen',      1, 16);
             o.addCommand('panLeft',  0, '< pan',         'leftarrow',  'pan focus area left',       2, 15, @(~,~)o.zoomer.pan(-0.8));
             o.addCommand('panRight', 0, 'pan >',         'rightarrow', 'pan focus area right',      3, 15, @(~,~)o.zoomer.pan(+0.8));
             o.addCommand('zoomIn',   0, 'zoom in',       'add',        'narrow focus area duration', 2, 14, @(~,~)o.zoomer.zoom(0.8));
             o.addCommand('zoomOut',  0, 'zoom out',      'subtract',   'expand focus area duration', 3, 14, @(~,~)o.zoomer.zoom(1.25));
             o.addCommand('zoomReg',  0, 'zoom sel',      'z',          'zoom to selection',                2, 13, @o.zoomtoRegion);
 
-            o.addCommandDesc('pantext', 0, 'Edit dT',      1, 12);
+            o.addCommandDesc('pantext1', 0, 'Edit dT',      1, 12);
             o.addCommand('deleteSapflow', me,  'delete SF data','d',          'delete selected sapflow data',         2, 11, @o.deleteSapflow);
             o.addCommand('interpolateSapflow', me,  'interpolate SF','i',          'interpolate selected sapflow data',    3, 11, @o.interpolateSapflow);
             o.addCommand('addBreakpoint', me,  'add dT breakpoint','shift-b',          'add dT breakpoint',         3, 10, @o.addBreak);
 
-            o.addCommandDesc('pantext', 0, 'Edit dTmax Baseline',      1, 9);
+            o.addCommandDesc('pantext2', 0, 'Edit dTmax Baseline',      1, 9);
             o.addCommand('delBla',   me, 'del BL anchors','delete',          'delete baseline anchors in range', 2, 8, @o.delBla);
             o.addCommand('anchorBla', me, 'anchor BL',     'a',          'anchor baseline to suggested points',  3, 8, @o.anchorBla);
 
-            o.addCommandDesc('pantext', 0, 'Automatic dTmax Baseline',      1, 7);
+            o.addCommandDesc('pantext3', 0, 'Automatic dTmax Baseline',      1, 7);
             o.addCommand('autoNightly', me,     'Nightly BL',     'shift-n',          'apply nightly baseline anchors',       2, 6, @o.autoNightlyBaseline);
             o.addCommand('auto', me,     'auto BL',     'shift-a',          'apply automatic baseline anchors',       3, 6, @o.autoSetBaseline);
 
             o.addCommand('undo', me,    'undo last',     'control-z',          'undo last command',                    1, 6, @(~,~)o.sfp.undo());
 
-            o.addCommandDesc('pantext', 0, 'Flag questionable k data',      1, 4);
+            o.addCommandDesc('pantext4', 0, 'Flag questionable k data',      1, 4);
 
             o.addCommand('prevSensor', 0, 'prev sensor',         'uparrow', 'prev sensor',      2, 1, @(~,~)o.selectSensor(-1));
             o.addCommand('nextSensor',  0, 'next sensor',         'downarrow',  'next sensor',       3, 1, @(~,~)o.selectSensor(1));
@@ -137,8 +137,10 @@ classdef SapEditWindow < LineEditWindow
             o.zoomer.createZoomAreaIndicators();
 
             o.projectConfig.numSensors = 0;
+            
+            o.show();
          end
-
+         
     end
 
     methods (Access = private)
